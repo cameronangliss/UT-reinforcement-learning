@@ -87,12 +87,12 @@ def main():
     args = parser.parse_args()
     # using sample averaging
     reward_history, optimal_action_ratio_history = train(SampleAverageAgent)
-    np.savetxt("result.out", reward_history)
-    np.savetxt("result.out", optimal_action_ratio_history)
+    np.savetxt("result.out", reward_history, delimiter=' ', newline='')
+    np.savetxt("result.out", optimal_action_ratio_history, delimiter=' ', newline='')
     # using constant step-size
     reward_history, optimal_action_ratio_history = train(ConstStepSizeAgent)
-    np.savetxt("result.out", reward_history)
-    np.savetxt("result.out", optimal_action_ratio_history)
+    np.savetxt("result.out", reward_history, delimiter=' ', newline='')
+    np.savetxt("result.out", optimal_action_ratio_history, delimiter=' ', newline='')
 
 
 if __name__ == "__main__":
