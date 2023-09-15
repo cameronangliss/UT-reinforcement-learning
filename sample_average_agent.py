@@ -7,7 +7,7 @@ from arm import Arm
 class SampleAverageAgent:
     def __init__(self):
         self.arms = [Arm() for _ in range(10)]
-        self.samples = [0] * 10
+        self.samples = [[0]] * 10
         self.epsilon = 0.1
 
     def get_optimal(self):
