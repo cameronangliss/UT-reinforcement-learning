@@ -1,3 +1,5 @@
+import argparse
+
 from const_step_size_agent import ConstStepSizeAgent
 from sample_average_agent import SampleAverageAgent, incremental_average
 
@@ -20,13 +22,16 @@ def train(agent_class):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filename")
+    args = parser.parse_args()
     # using sample averaging
     reward_history, optimal_action_ratio_history = train(SampleAverageAgent)
-    with open("result.out", "w") as f:
+    with open(args.filename, "w") as f:
         f.write(f"{reward_history}\n{optimal_action_ratio_history}\n")
     # using constant step-size
     reward_history, optimal_action_ratio_history = train(ConstStepSizeAgent)
-    with open("result.out", "a") as f:
+    with open(args.filename, "a") as f:
         f.write(f"{reward_history}\n{optimal_action_ratio_history}")
 
 
