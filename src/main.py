@@ -18,7 +18,7 @@ def train(agent):
             reward_history[step_num] = incremental_average(reward_history[step_num], reward, run_num)
             action_was_optimal = action == optimal_action
             optimal_action_ratio_history[step_num] = incremental_average(optimal_action_ratio_history[step_num], float(action_was_optimal), run_num)
-        print(f"Progress: {round(100 * (run_num + 1) / 300, ndigits=3)}%", end="\r")
+        print(f"Progress: {round(100 * (run_num + 1) / 300, ndigits=1)}%", end="\r")
     return reward_history, optimal_action_ratio_history
 
 
