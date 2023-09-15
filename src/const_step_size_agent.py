@@ -20,7 +20,7 @@ class ConstStepSizeAgent:
         else:
             action = np.argmax(self.q_estimates)
         reward = self.arms[action].pull()
-        self.q_estimate[action] += self.alpha * (reward - self.q_estimate[action])
+        self.q_estimates[action] += self.alpha * (reward - self.q_estimates[action])
         for arm in self.arms:
             arm.update()
         return action, reward
