@@ -1,5 +1,4 @@
 import argparse
-import random
 
 import numpy as np
 
@@ -9,10 +8,10 @@ class Arm:
         self.mean = 0
 
     def pull(self) -> float:
-        return random.normalvariate(self.mean, 1)
+        return np.random.normal(self.mean, 1)
 
     def update(self):
-        self.mean += random.normalvariate(0, 0.01)
+        self.mean += np.random.normal(0, 0.01)
 
 
 # NOTE: We assume that n begins at 0
@@ -31,8 +30,8 @@ class SampleAverageAgent:
         return np.argmax([arm.mean for arm in self.arms])
 
     def choose(self):
-        if random.random() < self.epsilon:
-            action = random.choice(range(10))
+        if np.random.random() < self.epsilon:
+            action = np.random.choice(range(10))
         else:
             action = np.argmax(self.avg_rewards)
         reward = self.arms[action].pull()
@@ -54,8 +53,8 @@ class ConstStepSizeAgent:
         return np.argmax([arm.mean for arm in self.arms])
 
     def choose(self):
-        if random.random() < self.epsilon:
-            action = random.choice(range(10))
+        if np.random.random() < self.epsilon:
+            action = np.random.choice(range(10))
         else:
             action = np.argmax(self.q_estimates)
         reward = self.arms[action].pull()
