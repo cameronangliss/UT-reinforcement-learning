@@ -1,7 +1,68 @@
 import argparse
+import random
 
-from const_step_size_agent import ConstStepSizeAgent
-from sample_average_agent import SampleAverageAgent, incremental_average
+import numpy as np
+
+
+class Arm:
+    def __init__(self):
+        self.mean = 0
+
+    def pull(self) -> float:
+        return random.normalvariate(self.mean, 1)
+
+    def update(self):
+        self.mean += random.normalvariate(0, 0.01)
+
+
+# NOTE: We assume that n begins at 0
+def incremental_average(current_average: float, new_value: float, n: int) -> float:
+    return (n / (n + 1)) * current_average + new_value / (n + 1)
+
+
+class SampleAverageAgent:
+    def __init__(self):
+        self.arms = [Arm() for _ in range(10)]
+        self.avg_rewards = [0] * 10
+        self.epsilon = 0.1
+        self.n = 0
+
+    def get_optimal(self):
+        return np.argmax([arm.mean for arm in self.arms])
+
+    def choose(self):
+        if random.random() < self.epsilon:
+            action = random.choice(range(10))
+        else:
+            action = np.argmax(self.avg_rewards)
+        reward = self.arms[action].pull()
+        self.avg_rewards[action] = incremental_average(self.avg_rewards[action], reward, self.n)
+        for arm in self.arms:
+            arm.update()
+        self.n += 1
+        return action, reward
+
+
+class ConstStepSizeAgent:
+    def __init__(self):
+        self.arms = [Arm() for _ in range(10)]
+        self.q_estimates = [0] * 10
+        self.alpha = 0.1
+        self.epsilon = 0.1
+
+    def get_optimal(self):
+        return np.argmax([arm.mean for arm in self.arms])
+
+    def choose(self):
+        if random.random() < self.epsilon:
+            action = random.choice(range(10))
+        else:
+            action = np.argmax(self.q_estimates)
+        reward = self.arms[action].pull()
+        self.q_estimates[action] += self.alpha * (reward - self.q_estimates[action])
+        for arm in self.arms:
+            arm.update()
+        return action, reward
 
 
 def train(agent_class):
