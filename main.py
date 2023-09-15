@@ -28,11 +28,11 @@ def main():
     # using sample averaging
     reward_history, optimal_action_ratio_history = train(SampleAverageAgent)
     with open(args.filename, "w") as f:
-        f.write(f"{reward_history}\n{optimal_action_ratio_history}\n")
+        f.write(f"{' '.join([str(reward) for reward in reward_history])}\n{' '.join([str(ratio) for ratio in optimal_action_ratio_history])}\n")
     # using constant step-size
     reward_history, optimal_action_ratio_history = train(ConstStepSizeAgent)
     with open(args.filename, "a") as f:
-        f.write(f"{reward_history}\n{optimal_action_ratio_history}")
+        f.write(f"{' '.join([str(reward) for reward in reward_history])}\n{' '.join([str(ratio) for ratio in optimal_action_ratio_history])}")
 
 
 if __name__ == "__main__":
