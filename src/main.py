@@ -1,10 +1,5 @@
 from const_step_size_agent import ConstStepSizeAgent
-from sample_average_agent import SampleAverageAgent
-
-
-# NOTE: We assume that n begins at 0
-def incremental_average(current_average: float, new_value: float, n: int) -> float:
-    return (n / (n + 1)) * current_average + new_value / (n + 1)
+from sample_average_agent import SampleAverageAgent, incremental_average
 
 
 def train(agent_class):
