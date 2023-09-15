@@ -7,11 +7,12 @@ def incremental_average(current_average: float, new_value: float, n: int) -> flo
     return (n / (n + 1)) * current_average + new_value / (n + 1)
 
 
-def train(agent):
-    print(f"Training {agent.__class__.__name__}...")
+def train(agent_class):
+    print(f"Training {agent_class.__name__}...")
     reward_history = [0] * 10**4
     optimal_action_ratio_history = [0] * 10**4
     for run_num in range(300):
+        agent = agent_class()
         for step_num in range(10**4):
             optimal_action = agent.get_optimal()
             action, reward = agent.choose()
@@ -19,18 +20,17 @@ def train(agent):
             action_was_optimal = action == optimal_action
             optimal_action_ratio_history[step_num] = incremental_average(optimal_action_ratio_history[step_num], float(action_was_optimal), run_num)
         print(f"Progress: {round(100 * (run_num + 1) / 300, ndigits=1)}%", end="\r")
+    print("Done!")
     return reward_history, optimal_action_ratio_history
 
 
 def main():
     # using sample averaging
-    agent = SampleAverageAgent()
-    reward_history, optimal_action_ratio_history = train(agent)
+    reward_history, optimal_action_ratio_history = train(SampleAverageAgent)
     with open("result.out", "w") as f:
         f.write(f"{reward_history}\n{optimal_action_ratio_history}\n")
     # using constant step-size
-    agent = ConstStepSizeAgent()
-    reward_history, optimal_action_ratio_history = train(agent)
+    reward_history, optimal_action_ratio_history = train(ConstStepSizeAgent)
     with open("result.out", "a") as f:
         f.write(f"{reward_history}\n{optimal_action_ratio_history}")
 
