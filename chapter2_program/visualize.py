@@ -29,4 +29,4 @@ with open(filename,'r') as f:
     axes[1].plot(constant['average_best_action_taken'])
 
     fig.show()
-    _ = input()
+    fig.savefig("result.png")
