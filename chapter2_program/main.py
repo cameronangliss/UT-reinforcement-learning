@@ -27,7 +27,7 @@ class Agent:
 class SampleAverageAgent(Agent):
     def __init__(self):
         super().__init__()
-        self.n = 0
+        self.ns = [0] * 10
 
     def choose(self):
         if np.random.random() < self.epsilon:
@@ -35,8 +35,8 @@ class SampleAverageAgent(Agent):
         else:
             action = np.argmax(self.q_estimates)
         reward = self.arms[action].pull()
-        self.n += 1
-        self.q_estimates[action] += (reward - self.q_estimates[action]) / self.n
+        self.ns[action] += 1
+        self.q_estimates[action] += (reward - self.q_estimates[action]) / self.ns[action]
         for arm in self.arms:
             arm.update()
         return action, reward
