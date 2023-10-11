@@ -4,12 +4,13 @@ import numpy as np
 from env import EnvSpec
 from policy import Policy
 
+
 def on_policy_n_step_td(
-    env_spec:EnvSpec,
-    trajs:Iterable[Iterable[Tuple[int,int,int,int]]],
-    n:int,
-    alpha:float,
-    initV:np.array
+    env_spec: EnvSpec,
+    trajs: Iterable[Iterable[Tuple[int, int, int, int]]],
+    n: int,
+    alpha: float,
+    initV: np.array,
 ) -> Tuple[np.array]:
     """
     input:
@@ -30,14 +31,15 @@ def on_policy_n_step_td(
 
     return V
 
+
 def off_policy_n_step_sarsa(
-    env_spec:EnvSpec,
-    trajs:Iterable[Iterable[Tuple[int,int,int,int]]],
-    bpi:Policy,
-    n:int,
-    alpha:float,
-    initQ:np.array
-) -> Tuple[np.array,Policy]:
+    env_spec: EnvSpec,
+    trajs: Iterable[Iterable[Tuple[int, int, int, int]]],
+    bpi: Policy,
+    n: int,
+    alpha: float,
+    initQ: np.array,
+) -> Tuple[np.array, Policy]:
     """
     input:
         env_spec: environment spec

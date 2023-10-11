@@ -19,7 +19,7 @@ class Agent:
         self.arms = [Arm() for _ in range(10)]
         self.q_estimates = [0] * 10
         self.epsilon = 0.1
-    
+
     def get_optimal(self):
         return np.argmax([arm.mean for arm in self.arms])
 
@@ -36,7 +36,9 @@ class SampleAverageAgent(Agent):
             action = np.argmax(self.q_estimates)
         reward = self.arms[action].pull()
         self.ns[action] += 1
-        self.q_estimates[action] += (reward - self.q_estimates[action]) / self.ns[action]
+        self.q_estimates[action] += (reward - self.q_estimates[action]) / self.ns[
+            action
+        ]
         for arm in self.arms:
             arm.update()
         return action, reward
@@ -69,8 +71,12 @@ def train(agent_class):
         for step_num in range(10**4):
             optimal_action = agent.get_optimal()
             action, reward = agent.choose()
-            reward_history[step_num] += (reward - reward_history[step_num]) / (run_num + 1)
-            optimal_action_ratio_history[step_num] += (float(action == optimal_action) - optimal_action_ratio_history[step_num]) / (run_num + 1)
+            reward_history[step_num] += (reward - reward_history[step_num]) / (
+                run_num + 1
+            )
+            optimal_action_ratio_history[step_num] += (
+                float(action == optimal_action) - optimal_action_ratio_history[step_num]
+            ) / (run_num + 1)
     print("Done!")
     return reward_history, optimal_action_ratio_history
 

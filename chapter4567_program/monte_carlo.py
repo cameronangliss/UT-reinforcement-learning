@@ -4,12 +4,13 @@ import numpy as np
 from env import EnvSpec
 from policy import Policy
 
+
 def off_policy_mc_prediction_ordinary_importance_sampling(
-    env_spec:EnvSpec,
-    trajs:Iterable[Iterable[Tuple[int,int,int,int]]],
-    bpi:Policy,
-    pi:Policy,
-    initQ:np.array
+    env_spec: EnvSpec,
+    trajs: Iterable[Iterable[Tuple[int, int, int, int]]],
+    bpi: Policy,
+    pi: Policy,
+    initQ: np.array,
 ) -> np.array:
     """
     input:
@@ -30,12 +31,13 @@ def off_policy_mc_prediction_ordinary_importance_sampling(
 
     return Q
 
+
 def off_policy_mc_prediction_weighted_importance_sampling(
-    env_spec:EnvSpec,
-    trajs:Iterable[Iterable[Tuple[int,int,int,int]]],
-    bpi:Policy,
-    pi:Policy,
-    initQ:np.array
+    env_spec: EnvSpec,
+    trajs: Iterable[Iterable[Tuple[int, int, int, int]]],
+    bpi: Policy,
+    pi: Policy,
+    initQ: np.array,
 ) -> np.array:
     """
     input:
