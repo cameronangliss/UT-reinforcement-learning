@@ -25,11 +25,20 @@ def off_policy_mc_prediction_ordinary_importance_sampling(
         Q: $q_pi$ function; numpy array shape of [nS,nA]
     """
 
-    #####################
-    # TODO: Implement Off Policy Monte-Carlo prediction algorithm using ordinary importance
-    # sampling (Hint: Sutton Book p. 109, every-visit implementation is fine)
-    #####################
-
+    Q = initQ
+    for episode in trajs:
+        G = 0
+        W = 1
+        ns = np.zeros([env_spec.nS])
+        for t in range(len(episode)):
+            if W != 0:
+                break
+            S = episode[t][0]
+            A = episode[t][1]
+            ns[S] += 1
+            G = env_spec.gamma * G + episode[t][2]
+            Q[S][A] += W / ns[S] * (G - Q[S][A])
+            W *= pi.action_prob(S, A) / bpi.action_prob(S, A)
     return Q
 
 
@@ -52,9 +61,18 @@ def off_policy_mc_prediction_weighted_importance_sampling(
         Q: $q_pi$ function; numpy array shape of [nS,nA]
     """
 
-    #####################
-    # TODO: Implement Off Policy Monte-Carlo prediction algorithm using weighted importance
-    # sampling (Hint: Sutton Book p. 110, every-visit implementation is fine)
-    #####################
-
+    Q = initQ
+    C = np.zeros([env_spec.nS, env_spec.nA])
+    for episode in trajs:
+        G = 0
+        W = 1
+        for t in range(len(episode)):
+            if W != 0:
+                break
+            S = episode[t][0]
+            A = episode[t][1]
+            G = env_spec.gamma * G + episode[t][2]
+            C[S][A] += W
+            Q[S][A] += W / C[S][A] * (G - Q[S][A])
+            W *= pi.action_prob(S, A) / bpi.action_prob(S, A)
     return Q
