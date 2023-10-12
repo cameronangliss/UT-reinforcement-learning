@@ -31,7 +31,7 @@ def off_policy_mc_prediction_ordinary_importance_sampling(
         W = 1
         ns = np.zeros([env_spec.nS])
         for t in range(len(episode)):
-            if W != 0:
+            if W == 0:
                 break
             S = episode[t][0]
             A = episode[t][1]
@@ -67,7 +67,7 @@ def off_policy_mc_prediction_weighted_importance_sampling(
         G = 0
         W = 1
         for t in range(len(episode)):
-            if W != 0:
+            if W == 0:
                 break
             S = episode[t][0]
             A = episode[t][1]
