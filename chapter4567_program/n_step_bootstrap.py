@@ -46,7 +46,12 @@ def on_policy_n_step_td(
                     T = t + 1
             tau = t - n + 1
             if tau >= 0:
-                G = sum([env_spec.gamma**(i - tau - 1) * R[i] for i in range(tau + 1, min(tau + n, T) + 1)])
+                G = sum(
+                    [
+                        env_spec.gamma ** (i - tau - 1) * R[i]
+                        for i in range(tau + 1, min(tau + n, T) + 1)
+                    ]
+                )
                 if tau + n < T:
                     G += env_spec.gamma**n * V[S[tau + n]]
                 V[S[tau]] += alpha * (G - V[S[tau]])
@@ -86,7 +91,7 @@ def off_policy_n_step_sarsa(
 
         def action(self, state):
             return np.argmax(self.Q[state])
-    
+
     pi = CurrentPolicy(initQ)
 
     Q = initQ
@@ -105,8 +110,18 @@ def off_policy_n_step_sarsa(
                     A += [episode[t + 1][1]]
             tau = t - n + 1
             if tau >= 0:
-                rho = product([pi.action_prob(S[i], A[i]) / bpi.action_prob(S[i], A[i]) for i in range(tau + 1, min(tau + n, T - 1) + 1)])
-                G = sum([env_spec.gamma**(i - tau - 1) * R[i] for i in range(tau + 1, min(tau + n, T) + 1)])
+                rho = product(
+                    [
+                        pi.action_prob(S[i], A[i]) / bpi.action_prob(S[i], A[i])
+                        for i in range(tau + 1, min(tau + n, T - 1) + 1)
+                    ]
+                )
+                G = sum(
+                    [
+                        env_spec.gamma ** (i - tau - 1) * R[i]
+                        for i in range(tau + 1, min(tau + n, T) + 1)
+                    ]
+                )
                 if tau + n < T:
                     G += env_spec.gamma**n * Q[S[tau + n]][A[tau + n]]
                 Q[S[tau]][A[tau]] += alpha * rho * (G - Q[S[tau]][A[tau]])
