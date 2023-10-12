@@ -8,8 +8,8 @@ from policy import Policy
 def get_expected_reward(env: EnvWithModel, V: np.array, state: int, action: int):
     expected_reward = 0
     for next_state in range(env.spec.nS):
-        transition_prob = env.TD()[state, action, next_state]
-        reward = env.R()[state, action, next_state]
+        transition_prob = env.TD[state, action, next_state]
+        reward = env.R[state, action, next_state]
         expected_reward += transition_prob * (reward + env.spec.gamma * V[next_state])
     return expected_reward
 
@@ -29,17 +29,17 @@ def value_prediction(
     """
 
     V = initV
-    Q = np.full(shape=[env.spec.nS, env.spec.nA], fill_value=[])
+    Q = np.zeros(shape=[env.spec.nS, env.spec.nA])
     while True:
         delta = 0
         for state in range(env.spec.nS):
             old_value = V[state]
-            Q[state] = [get_expected_reward(env, V, state, action) for action in env.spec.nA]
+            Q[state] = [get_expected_reward(env, V, state, action) for action in range(env.spec.nA)]
             V[state] = sum(
                 [
                     pi.action_prob(state, action)
                     * Q[state][action]
-                    for action in env.spec.nA
+                    for action in range(env.spec.nA)
                 ]
             )
             delta = max(delta, abs(old_value - V[state]))
@@ -63,27 +63,27 @@ def value_iteration(
     """
 
     V = initV
-    Q = np.full(shape=[env.spec.nS, env.spec.nA], fill_value=[])
+    Q = np.zeros(shape=[env.spec.nS, env.spec.nA])
     while True:
         delta = 0
         for state in range(env.spec.nS):
             old_value = initV[state]
-            Q[state] = [get_expected_reward(env, V, state, action) for action in env.spec.nA]
+            Q[state] = [get_expected_reward(env, V, state, action) for action in range(env.spec.nA)]
             V[state] = max(Q[state])
             delta = max(delta, abs(old_value - V[state]))
         if delta < theta:
             break
 
     class OptimalPolicy(Policy):
-        def __init__(self, values: np.array):
-            self.values = values
+        def __init__(self, Q: np.array):
+            self.Q = Q
 
         def action_prob(self, state, action):
-            return float(action == np.argmax(Q[state]))
+            return float(action == np.argmax(self.Q[state]))
 
         def action(self, state):
-            np.argmax(Q[state])
+            return np.argmax(self.Q[state])
 
-    pi = OptimalPolicy()
+    pi = OptimalPolicy(Q)
 
     return V, pi
