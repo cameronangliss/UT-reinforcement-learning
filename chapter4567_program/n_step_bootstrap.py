@@ -34,10 +34,10 @@ def on_policy_n_step_td(
     """
 
     V = initV
-    T = float("inf")
     for episode in trajs:
-        R = [0]
         S = [episode[0][0]]
+        R = [0]
+        T = float("inf")
         for t in range(len(episode)):
             if t < T:
                 R += [episode[t][2]]
