@@ -35,8 +35,9 @@ def off_policy_mc_prediction_ordinary_importance_sampling(
                 break
             S = episode[t][0]
             A = episode[t][1]
+            R = episode[t][2]
             ns[S] += 1
-            G = env_spec.gamma * G + episode[t][2]
+            G = env_spec.gamma * G + R
             Q[S][A] += W / ns[S] * (G - Q[S][A])
             W *= pi.action_prob(S, A) / bpi.action_prob(S, A)
     return Q
@@ -71,7 +72,8 @@ def off_policy_mc_prediction_weighted_importance_sampling(
                 break
             S = episode[t][0]
             A = episode[t][1]
-            G = env_spec.gamma * G + episode[t][2]
+            R = episode[t][2]
+            G = env_spec.gamma * G + R
             C[S][A] += W
             Q[S][A] += W / C[S][A] * (G - Q[S][A])
             W *= pi.action_prob(S, A) / bpi.action_prob(S, A)
