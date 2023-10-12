@@ -36,20 +36,22 @@ def on_policy_n_step_td(
     V = initV
     T = float("inf")
     for episode in trajs:
-        R = []
+        R = [0]
         S = [episode[0][0]]
         for t in range(len(episode)):
             if t < T:
                 R += [episode[t][2]]
                 S += [episode[t][3]]
+                if t == len(episode) - 1:
+                    T = t + 1
             tau = t - n + 1
-            if tau == T - 1:
-                break
-            elif tau >= 0:
-                G = sum([env_spec.gamma**(i - tau - 1) * R[i] for i in range(tau + 1, min(tau + n, T))])
+            if tau >= 0:
+                G = sum([env_spec.gamma**(i - tau - 1) * R[i] for i in range(tau + 1, min(tau + n, T) + 1)])
                 if tau + n < T:
                     G += env_spec.gamma**n * V[S[tau + n]]
-                V[S[tau]] += alpha * (G - V[S[t]])
+                V[S[tau]] += alpha * (G - V[S[tau]])
+            if tau == T - 1:
+                break
     return V
 
 
@@ -91,7 +93,7 @@ def off_policy_n_step_sarsa(
     for episode in trajs:
         S = [episode[0][0]]
         A = [episode[0][1]]
-        R = []
+        R = [0]
         T = float("inf")
         for t in range(len(episode)):
             if t < T:
@@ -102,12 +104,12 @@ def off_policy_n_step_sarsa(
                 else:
                     A += [episode[t + 1][1]]
             tau = t - n + 1
+            if tau >= 0:
+                rho = product([pi.action_prob(S[i], A[i]) / bpi.action_prob(S[i], A[i]) for i in range(tau + 1, min(tau + n, T - 1) + 1)])
+                G = sum([env_spec.gamma**(i - tau - 1) * R[i] for i in range(tau + 1, min(tau + n, T) + 1)])
+                if tau + n < T:
+                    G += env_spec.gamma**n * Q[S[tau + n]][A[tau + n]]
+                Q[S[tau]][A[tau]] += alpha * rho * (G - Q[S[tau]][A[tau]])
             if tau == T - 1:
                 break
-            elif tau >= 0:
-                rho = product([pi.action_prob(S[i], A[i]) / bpi.action_prob(S[i], A[i]) for i in range(tau + 1, min(tau + n, T - 1))])
-                G = sum([env_spec.gamma**(i - tau - 1) * R[i] for i in range(tau + 1, min(tau + n, T - 1))])
-                if tau + n < T:
-                    G += env_spec.gamma**n + Q[S[tau + n]][A[tau + n]]
-                Q[S[tau]][A[tau]] += alpha * rho * (G - Q[S[tau]][A[tau]])
     return Q, pi
