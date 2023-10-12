@@ -8,7 +8,10 @@ from policy import Policy
 
 
 def product(lst):
-    return reduce(lambda x, y: x * y, lst)
+    if len(lst) == 0:
+        return 1
+    else:
+        return reduce(lambda x, y: x * y, lst)
 
 
 def on_policy_n_step_td(
@@ -92,8 +95,8 @@ def off_policy_n_step_sarsa(
         T = float("inf")
         for t in range(len(episode)):
             if t < T:
-                R += episode[t][2]
-                S += episode[t][3]
+                R += [episode[t][2]]
+                S += [episode[t][3]]
                 if t == len(episode) - 1:
                     T = t + 1
                 else:
