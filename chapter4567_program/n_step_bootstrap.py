@@ -1,9 +1,14 @@
+from functools import reduce
 from typing import Iterable, Tuple
 
 import numpy as np
 
 from env import EnvSpec
 from policy import Policy
+
+
+def product(lst):
+    return reduce(lambda x, y: x * y, lst)
 
 
 def on_policy_n_step_td(
@@ -25,11 +30,23 @@ def on_policy_n_step_td(
         V: $v_pi$ function; numpy array shape of [nS]
     """
 
-    #####################
-    # TODO: Implement On Policy n-Step TD algorithm
-    # sampling (Hint: Sutton Book p. 144)
-    #####################
-
+    V = initV
+    T = float("inf")
+    for episode in trajs:
+        R = []
+        S = [episode[0][0]]
+        for t in range(len(episode)):
+            if t < T:
+                R += [episode[t][2]]
+                S += [episode[t][3]]
+            tau = t - n + 1
+            if tau == T - 1:
+                break
+            elif tau >= 0:
+                G = sum([env_spec.gamma**(i - tau - 1) * R[i] for i in range(tau + 1, min(tau + n, T))])
+                if tau + n < T:
+                    G += env_spec.gamma**n * V[S[tau + n]]
+                V[S[tau]] += alpha * (G - V[S[t]])
     return V
 
 
@@ -55,9 +72,39 @@ def off_policy_n_step_sarsa(
         policy: $pi_star$; instance of policy class
     """
 
-    #####################
-    # TODO: Implement Off Policy n-Step SARSA algorithm
-    # sampling (Hint: Sutton Book p. 149)
-    #####################
+    class CurrentPolicy(Policy):
+        def __init__(self, Q: np.array):
+            self.Q = Q
 
+        def action_prob(self, state, action):
+            return float(action == np.argmax(self.Q[state]))
+
+        def action(self, state):
+            return np.argmax(self.Q[state])
+    
+    pi = CurrentPolicy(initQ)
+
+    Q = initQ
+    for episode in trajs:
+        S = [episode[0][0]]
+        A = [episode[0][1]]
+        R = []
+        T = float("inf")
+        for t in range(len(episode)):
+            if t < T:
+                R += episode[t][2]
+                S += episode[t][3]
+                if t == len(episode) - 1:
+                    T = t + 1
+                else:
+                    A += [episode[t + 1][1]]
+            tau = t - n + 1
+            if tau == T - 1:
+                break
+            elif tau >= 0:
+                rho = product([pi.action_prob(S[i], A[i]) / bpi.action_prob(S[i], A[i]) for i in range(tau + 1, min(tau + n, T - 1))])
+                G = sum([env_spec.gamma**(i - tau - 1) * R[i] for i in range(tau + 1, min(tau + n, T - 1))])
+                if tau + n < T:
+                    G += env_spec.gamma**n + Q[S[tau + n]][A[tau + n]]
+                Q[S[tau]][A[tau]] += alpha * rho * (G - Q[S[tau]][A[tau]])
     return Q, pi
