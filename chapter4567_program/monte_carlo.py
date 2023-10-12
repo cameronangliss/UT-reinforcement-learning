@@ -26,19 +26,19 @@ def off_policy_mc_prediction_ordinary_importance_sampling(
     """
 
     Q = initQ
+    ns = np.zeros([env_spec.nS, env_spec.nA])
     for episode in trajs:
         G = 0
         W = 1
-        ns = np.zeros([env_spec.nS])
         for t in range(len(episode)):
             if W == 0:
                 break
             S = episode[t][0]
             A = episode[t][1]
             R = episode[t][2]
-            ns[S] += 1
+            ns[S, A] += 1
             G = env_spec.gamma * G + R
-            Q[S][A] += W / ns[S] * (G - Q[S][A])
+            Q[S][A] += W / ns[S, A] * (G - Q[S][A])
             W *= pi.action_prob(S, A) / bpi.action_prob(S, A)
     return Q
 
