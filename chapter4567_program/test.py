@@ -1,6 +1,8 @@
 from functools import partial
 
 import numpy as np
+from tqdm import tqdm
+
 from dp import value_iteration, value_prediction
 from env import Env, EnvSpec, EnvWithModel
 from monte_carlo import off_policy_mc_prediction_ordinary_importance_sampling as mc_ois
@@ -8,7 +10,6 @@ from monte_carlo import off_policy_mc_prediction_weighted_importance_sampling as
 from n_step_bootstrap import off_policy_n_step_sarsa as nsarsa
 from n_step_bootstrap import on_policy_n_step_td as ntd
 from policy import Policy
-from tqdm import tqdm
 
 
 class RandomPolicy(Policy):

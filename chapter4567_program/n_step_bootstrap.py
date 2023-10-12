@@ -1,6 +1,7 @@
 from typing import Iterable, Tuple
 
 import numpy as np
+
 from env import EnvSpec
 from policy import Policy
 

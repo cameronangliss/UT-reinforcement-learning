@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import numpy as np
+
 from env import EnvWithModel
 from policy import Policy
 
@@ -34,11 +35,13 @@ def value_prediction(
         delta = 0
         for state in range(env.spec.nS):
             old_value = V[state]
-            Q[state] = [get_expected_reward(env, V, state, action) for action in range(env.spec.nA)]
+            Q[state] = [
+                get_expected_reward(env, V, state, action)
+                for action in range(env.spec.nA)
+            ]
             V[state] = sum(
                 [
-                    pi.action_prob(state, action)
-                    * Q[state][action]
+                    pi.action_prob(state, action) * Q[state][action]
                     for action in range(env.spec.nA)
                 ]
             )
@@ -68,7 +71,10 @@ def value_iteration(
         delta = 0
         for state in range(env.spec.nS):
             old_value = initV[state]
-            Q[state] = [get_expected_reward(env, V, state, action) for action in range(env.spec.nA)]
+            Q[state] = [
+                get_expected_reward(env, V, state, action)
+                for action in range(env.spec.nA)
+            ]
             V[state] = max(Q[state])
             delta = max(delta, abs(old_value - V[state]))
         if delta < theta:
