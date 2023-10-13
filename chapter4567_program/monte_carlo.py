@@ -30,6 +30,7 @@ def off_policy_mc_prediction_ordinary_importance_sampling(
     for episode in trajs:
         G = 0
         W = 1
+        episode = list(reversed(episode))
         for t in range(len(episode)):
             if W == 0:
                 break
@@ -67,6 +68,7 @@ def off_policy_mc_prediction_weighted_importance_sampling(
     for episode in trajs:
         G = 0
         W = 1
+        episode = list(reversed(episode))
         for t in range(len(episode)):
             if W == 0:
                 break
