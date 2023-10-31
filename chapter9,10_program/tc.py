@@ -1,14 +1,14 @@
 import numpy as np
 from algo import ValueFunctionWithApproximation
-from typing import NamedTuple
+from typing import NamedTuple, List, Tuple
 
 
 class Tiling(NamedTuple):
-    x_ticks: list[float]
-    y_ticks: list[float]
+    x_ticks: List[float]
+    y_ticks: List[float]
     values: np.array
 
-    def get_tile_coords(self, s) -> tuple[int, int]:
+    def get_tile_coords(self, s) -> Tuple[int, int]:
         x = 0
         while s[0] > self.x_ticks[x]:
             x += 1
@@ -27,7 +27,7 @@ class Tiling(NamedTuple):
 
 
 class ValueFunctionWithTile(ValueFunctionWithApproximation):
-    tilings: list[Tiling]
+    tilings: List[Tiling]
 
     def __init__(self,
                  state_low:np.array,
