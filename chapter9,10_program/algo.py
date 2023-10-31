@@ -1,4 +1,5 @@
 import numpy as np
+import gym
 from policy import Policy
 
 class ValueFunctionWithApproximation(object):
@@ -28,7 +29,7 @@ class ValueFunctionWithApproximation(object):
         raise NotImplementedError()
 
 def semi_gradient_n_step_td(
-    env, #open-ai environment
+    env:gym.Env,
     gamma:float,
     pi:Policy,
     n:int,
@@ -50,5 +51,29 @@ def semi_gradient_n_step_td(
     output:
         None
     """
-    #TODO: implement this function
 
+    for _ in range(num_episode):
+        state, _ = env.reset()
+        states = [state]
+        rewards = [0]
+        T = float("inf")
+        t = 0
+        done = False
+        while not done:
+            # print("states:", [[round(n, 4) for n in s.tolist()] for s in states])
+            if t < T:
+                action = pi.action(state)
+                state, reward, done, _, _ = env.step(action)
+                states += [state]
+                rewards += [reward]
+                if done:
+                    T = t + 1
+            tau = t - n + 1
+            if tau >= 0:
+                G = sum([gamma**(i - tau - 1) * rewards[i] for i in range(tau + 1, min(tau + n, T) + 1)])
+                if tau + n < T:
+                    G += gamma**n * V(states[tau + n])
+                V.update(alpha, G, states[tau])
+            if tau == T - 1:
+                break
+            t += 1
