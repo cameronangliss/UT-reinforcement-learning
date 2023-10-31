@@ -60,7 +60,6 @@ def semi_gradient_n_step_td(
         t = 0
         done = False
         while not done:
-            # print("states:", [[round(n, 4) for n in s.tolist()] for s in states])
             if t < T:
                 action = pi.action(state)
                 state, reward, done, _, _ = env.step(action)
