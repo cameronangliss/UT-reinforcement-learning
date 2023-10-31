@@ -6,9 +6,9 @@ from typing import NamedTuple
 class Tiling(NamedTuple):
     x_ticks: list[float]
     y_ticks: list[float]
-    values: list[list[float]]
+    values: np.array
 
-    def get_coords(self, s) -> tuple[int, int]:
+    def get_tile_coords(self, s) -> tuple[int, int]:
         x = 0
         while s[0] > self.x_ticks[x]:
             x += 1
@@ -18,11 +18,17 @@ class Tiling(NamedTuple):
         return x, y
 
     def get_value(self, s) -> float:
-        x, y = self.get_coords(s)
+        x, y = self.get_tile_coords(s)
         return self.values[x][y]
+    
+    def update(self, alpha, G, s_tau):
+        x, y = self.get_tile_coords(s_tau)
+        self.values[x][y] += alpha * (G - self.get_value(s_tau))
 
 
 class ValueFunctionWithTile(ValueFunctionWithApproximation):
+    tilings: list[Tiling]
+
     def __init__(self,
                  state_low:np.array,
                  state_high:np.array,
@@ -44,13 +50,11 @@ class ValueFunctionWithTile(ValueFunctionWithApproximation):
                 pos += tile_width
                 x_ticks += [pos[0]]
                 y_ticks += [pos[1]]
-            self.tilings += [Tiling(x_ticks, y_ticks, [[0] * len(x_ticks)] * len(y_ticks))]
+            self.tilings += [Tiling(x_ticks, y_ticks, np.zeros([len(x_ticks), len(y_ticks)]))]
 
     def __call__(self,s):
-        return sum([tiling.get_value(s) for tiling in self.tilings])
+        return np.sum([tiling.get_value(s) for tiling in self.tilings])
 
     def update(self,alpha,G,s_tau):
-        current_val = self(s_tau)
         for tiling in self.tilings:
-            x, y = tiling.get_coords(s_tau)
-            tiling.values[x][y] += alpha * (G - current_val)
+            tiling.update(alpha, G / len(self.tilings), s_tau)
