@@ -1,5 +1,26 @@
 import numpy as np
 from algo import ValueFunctionWithApproximation
+from typing import NamedTuple
+
+
+class Tiling(NamedTuple):
+    x_ticks: list[float]
+    y_ticks: list[float]
+    values: list[list[float]]
+
+    def get_coords(self, s) -> tuple[int, int]:
+        x = 0
+        while s[0] > self.x_ticks[x]:
+            x += 1
+        y = 0
+        while s[1] > self.y_ticks[y]:
+            y += 1
+        return x, y
+
+    def get_value(self, s) -> float:
+        x, y = self.get_coords(s)
+        return self.values[x][y]
+
 
 class ValueFunctionWithTile(ValueFunctionWithApproximation):
     def __init__(self,
@@ -17,34 +38,19 @@ class ValueFunctionWithTile(ValueFunctionWithApproximation):
         self.tilings = []
         for i in range(num_tilings):
             pos = state_low - (i / num_tilings) * tile_width
-            vert_borders = [pos[0]]
-            horiz_borders = [pos[1]]
+            x_ticks = []
+            y_ticks = []
             while pos[0] <= state_high[0] and pos[1] <= state_high[1]:
                 pos += tile_width
-                vert_borders += [pos[0]]
-                horiz_borders += [pos[1]]
-            self.tilings += [(vert_borders, horiz_borders, [0] * len(vert_borders)**2)]
+                x_ticks += [pos[0]]
+                y_ticks += [pos[1]]
+            self.tilings += [Tiling(x_ticks, y_ticks, [[0] * len(x_ticks)] * len(y_ticks))]
 
     def __call__(self,s):
-        score = 0
-        for vert_borders, horiz_borders, values in self.tilings:
-            x = 0
-            while s[0] < vert_borders[x]:
-                x += 1
-            y = 0
-            while s[1] < horiz_borders[y]:
-                y += 1
-            score += values[x * len(vert_borders) + y]
-        return score / len(self.tilings)
-
+        return sum([tiling.get_value(s) for tiling in self.tilings])
 
     def update(self,alpha,G,s_tau):
         current_val = self(s_tau)
-        for vert_borders, horiz_borders, values in self.tilings:
-            x = 0
-            while s_tau[0] < vert_borders[x]:
-                x += 1
-            y = 0
-            while s_tau[1] < horiz_borders[y]:
-                y += 1
-            values[x * len(vert_borders) + y] += alpha * (G - current_val)
+        for tiling in self.tilings:
+            x, y = tiling.get_coords(s_tau)
+            tiling.values[x][y] += alpha * (G - current_val)
