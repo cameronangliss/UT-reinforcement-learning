@@ -43,7 +43,7 @@ class ValueFunctionWithTile(ValueFunctionWithApproximation):
 
         self.tilings = []
         for i in range(num_tilings):
-            pos = state_low - (i / num_tilings) * tile_width
+            pos = state_low - i * (tile_width / num_tilings)
             x_ticks = []
             y_ticks = []
             while pos[0] <= state_high[0] and pos[1] <= state_high[1]:
@@ -57,4 +57,4 @@ class ValueFunctionWithTile(ValueFunctionWithApproximation):
 
     def update(self,alpha,G,s_tau):
         for tiling in self.tilings:
-            tiling.update(alpha, G / len(self.tilings), s_tau)
+            tiling.update(alpha, G, s_tau)
