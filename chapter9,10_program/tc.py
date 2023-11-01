@@ -10,10 +10,10 @@ class Tiling(NamedTuple):
 
     def get_tile_indices(self, s) -> Tuple[int, int]:
         x = 0
-        while s[0] > self.x_ticks[x]:
+        while self.x_ticks[x] < s[0]:
             x += 1
         y = 0
-        while s[1] > self.y_ticks[y]:
+        while self.y_ticks[y] < s[1]:
             y += 1
         return x, y
 
@@ -56,5 +56,6 @@ class ValueFunctionWithTile(ValueFunctionWithApproximation):
         return np.sum([tiling.get_value(s) for tiling in self.tilings]) / len(self.tilings)
 
     def update(self,alpha,G,s_tau):
+        print(G, self(s_tau))
         for tiling in self.tilings:
             tiling.update(alpha, G, s_tau)
