@@ -18,7 +18,7 @@ class ValueFunctionWithNN(ValueFunctionWithApproximation):
             torch.nn.ReLU(),
             torch.nn.Linear(32, 1)
         )
-        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-3, betas=(0.9, 0.999))
+        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.network.to(device=self.device)
 
@@ -29,7 +29,7 @@ class ValueFunctionWithNN(ValueFunctionWithApproximation):
 
     def update(self,alpha,G,s_tau):
         self.network.train()
-        loss = self.loss(torch.tensor(self(s_tau), requires_grad=True), torch.tensor(G))
+        loss = self.loss(torch.tensor([self(s_tau)], requires_grad=True), torch.tensor([G], requires_grad=True))
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
