@@ -20,13 +20,10 @@ class ValueFunctionWithNN(ValueFunctionWithApproximation):
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-3, betas=(0.9, 0.999))
 
     def __call__(self,s):
-        # print("state:", s)
         return float(self.network(torch.tensor(s))[0].item())
 
     def update(self,alpha,G,s_tau):
-        # print(s_tau)
-        loss = G - self(s_tau)
-        # print(loss)
+        loss = torch.tensor((G - self(s_tau))**2)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
