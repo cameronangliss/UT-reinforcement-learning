@@ -10,6 +10,7 @@ class ValueFunctionWithNN(ValueFunctionWithApproximation):
         state_dims: the number of dimensions of state space
         """
 
+        self.loss = torch.nn.MSELoss()
         self.network = torch.nn.Sequential(
             torch.nn.Linear(state_dims, 32),
             torch.nn.ReLU(),
@@ -18,12 +19,17 @@ class ValueFunctionWithNN(ValueFunctionWithApproximation):
             torch.nn.Linear(32, 1)
         )
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-3, betas=(0.9, 0.999))
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.network.to(device=self.device)
 
     def __call__(self,s):
-        return float(self.network(torch.tensor(s))[0].item())
+        self.network.eval()
+        input_tensor = torch.tensor(s, dtype=torch.float).to(self.device)
+        return float(self.network(input_tensor)[0].item())
 
     def update(self,alpha,G,s_tau):
-        loss = torch.tensor((G - self(s_tau))**2)
+        self.network.train()
+        loss = self.loss(torch.tensor(self(s_tau), requires_grad=True), torch.tensor(G))
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
