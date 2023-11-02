@@ -53,9 +53,8 @@ class ValueFunctionWithTile(ValueFunctionWithApproximation):
             self.tilings += [Tiling(x_ticks, y_ticks, np.zeros([len(x_ticks), len(y_ticks)]))]
 
     def __call__(self,s):
-        return np.sum([tiling.get_value(s) for tiling in self.tilings]) / len(self.tilings)
+        return np.sum([tiling.get_value(s) for tiling in self.tilings])
 
     def update(self,alpha,G,s_tau):
-        print(G, self(s_tau))
         for tiling in self.tilings:
             tiling.update(alpha, G, s_tau)
