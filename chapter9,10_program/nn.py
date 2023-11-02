@@ -27,7 +27,7 @@ class ValueFunctionWithNN(ValueFunctionWithApproximation):
 
     def update(self,alpha,G,s_tau):
         self.network.train()
-        loss = self.loss_fn(self.network(torch.tensor(s_tau)), torch.tensor([G]))
+        loss = self.loss_fn(self.network(torch.tensor(s_tau, dtype=torch.float)), torch.tensor([G]))
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
