@@ -1,33 +1,10 @@
 import numpy as np
 from algo import ValueFunctionWithApproximation
-from typing import NamedTuple, List, Tuple
-
-
-class Tiling(NamedTuple):
-    x_ticks: List[float]
-    y_ticks: List[float]
-    values: np.array
-
-    def get_tile_indices(self, s) -> Tuple[int, int]:
-        x = 0
-        while self.x_ticks[x] < s[0]:
-            x += 1
-        y = 0
-        while self.y_ticks[y] < s[1]:
-            y += 1
-        return x, y
-
-    def get_value(self, s) -> float:
-        x, y = self.get_tile_indices(s)
-        return self.values[x][y]
-    
-    def update(self, alpha, G, s_tau):
-        x, y = self.get_tile_indices(s_tau)
-        self.values[x][y] += alpha * (G - self.get_value(s_tau))
+from typing import List, Tuple
 
 
 class ValueFunctionWithTile(ValueFunctionWithApproximation):
-    tilings: List[Tiling]
+    tilings: List[Tuple[np.ndarray, np.ndarray]]
 
     def __init__(self,
                  state_low:np.array,
@@ -41,20 +18,20 @@ class ValueFunctionWithTile(ValueFunctionWithApproximation):
         tile_width: tile width for each dimension
         """
 
+        self.tile_width = tile_width
         self.tilings = []
+        num_tiles = np.ceil((state_high - state_low) / tile_width).astype(int) + 1
         for i in range(num_tilings):
-            pos = state_low - i * (tile_width / num_tilings)
-            x_ticks = []
-            y_ticks = []
-            while pos[0] <= state_high[0] and pos[1] <= state_high[1]:
-                pos += tile_width
-                x_ticks += [pos[0]]
-                y_ticks += [pos[1]]
-            self.tilings += [Tiling(x_ticks, y_ticks, np.zeros([len(x_ticks), len(y_ticks)]))]
+            start_pos = state_low - i * (tile_width / num_tilings)
+            weights = np.zeros(num_tiles)
+            self.tilings += [(start_pos, weights)]
 
     def __call__(self,s):
-        return np.sum([tiling.get_value(s) for tiling in self.tilings])
+        indices = [np.floor((s - start_pos) / self.tile_width).astype(int) for start_pos, _ in self.tilings]
+        weights_of_tilings = [weights for _, weights in self.tilings]
+        return sum([weights[index[0]][index[1]] for weights, index in zip(weights_of_tilings, indices)])
 
     def update(self,alpha,G,s_tau):
-        for tiling in self.tilings:
-            tiling.update(alpha, G, s_tau)
+        for start_pos, weights in self.tilings:
+            index = np.floor((s_tau - start_pos) / self.tile_width).astype(int)
+            weights[index[0]][index[1]] += alpha * (G - self(s_tau))
