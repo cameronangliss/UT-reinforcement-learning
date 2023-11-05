@@ -1,11 +1,8 @@
 import numpy as np
 from algo import ValueFunctionWithApproximation
-from typing import List, Tuple
 
 
 class ValueFunctionWithTile(ValueFunctionWithApproximation):
-    tilings: List[Tuple[np.ndarray, np.ndarray]]
-
     def __init__(self,
                  state_low:np.array,
                  state_high:np.array,
