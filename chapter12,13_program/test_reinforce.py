@@ -10,10 +10,6 @@ def test_reinforce(with_baseline):
     gamma = 1.
     alpha = 3e-4
 
-    if 'tensorflow' in sys.modules:
-        import tensorflow as tf
-        tf.reset_default_graph()
-
     pi = PiApproximationWithNN(
         env.observation_space.shape[0],
         env.action_space.n,
