@@ -1,5 +1,6 @@
 from typing import Iterable
 import numpy as np
+import torch
 
 class PiApproximationWithNN():
     def __init__(self,
@@ -12,18 +13,6 @@ class PiApproximationWithNN():
         alpha: learning rate
         """
         # TODO: implement here
-
-        # Tips for TF users: You will need a function that collects the probability of action taken
-        # actions; i.e. you need something like
-        #
-            # pi(.|s_t) = tf.constant([[.3,.6,.1], [.4,.4,.2]])
-            # a_t = tf.constant([1, 2])
-            # pi(a_t|s_t) =  [.6,.2]
-        #
-        # To implement this, you need a tf.gather_nd operation. You can use implement this by,
-        #
-            # tf.gather_nd(pi,tf.stack([tf.range(tf.shape(a_t)[0]),a_t],axis=1)),
-        # assuming len(pi) == len(a_t) == batch_size
 
     def __call__(self,s) -> int:
         # TODO: implement this method
@@ -62,17 +51,28 @@ class VApproximationWithNN(Baseline):
         state_dims: the number of dimensions of state space
         alpha: learning rate
         """
-        # TODO: implement here
+        
+        self.loss_fn = torch.nn.MSELoss()
+        self.network = torch.nn.Sequential(
+            torch.nn.Linear(state_dims, 32),
+            torch.nn.ReLU(),
+            torch.nn.Linear(32, 32),
+            torch.nn.ReLU(),
+            torch.nn.Linear(32, 1)
+        )
+        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=alpha, betas=(0.9, 0.999))
 
     def __call__(self,s) -> float:
-        # TODO: implement this method
-
-        raise NotImplementedError()
+        self.network.eval()
+        input_tensor = torch.tensor(s, dtype=torch.float)
+        return float(self.network(input_tensor)[0].detach().item())
 
     def update(self,s,G):
-        # TODO: implement this method
-
-        raise NotImplementedError()
+        self.network.train()
+        loss = self.loss_fn(self.network(torch.tensor(s, dtype=torch.float)), torch.tensor([G]))
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
 
 
 def REINFORCE(
