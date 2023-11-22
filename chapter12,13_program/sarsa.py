@@ -89,7 +89,7 @@ def SarsaLambda(
             x_prime = X(state, done, action_prime)
             Q = np.dot(w, x)
             Q_prime = np.dot(w, x_prime)
-            delta = R + gamma * Q_prime - Q
+            delta = R[t] + gamma * Q_prime - Q
             z = gamma * lam * z + (1 - alpha * gamma * lam * np.dot(z, x)) * x
             w += alpha * (delta + Q - Q_old) * z - alpha * (Q - Q_old) * x
             Q_old = Q_prime
