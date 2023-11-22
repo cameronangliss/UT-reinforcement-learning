@@ -50,7 +50,7 @@ if __name__ == "__main__":
     ax.set_ylabel('G_0')
     ax.legend()
 
-    plt.show()
+    plt.savefig("fig.png")
 
     # Note:
     # For CartPole-v0, without-baseline version could be more stable than with-baseline.
