@@ -17,31 +17,37 @@ class StateActionFeatureVectorWithTile():
         """
         self.num_actions = num_actions
         self.tile_width = tile_width
+        self.num_tilings = num_tilings
         self.num_tiles = np.ceil((state_high - state_low) / tile_width).astype(int) + 1
-        self.tilings = []
-        for i in range(num_tilings):
-            start_pos = state_low - i * (tile_width / num_tilings)
-            weights = np.zeros([*self.num_tiles, self.num_actions])
-            self.tilings += [(start_pos, weights)]
+        self.start_coords = [state_low - i * (tile_width / num_tilings) for i in range(num_tilings)]
 
     def feature_vector_len(self) -> int:
         """
         return dimension of feature_vector: d = num_actions * num_tilings * num_tiles
         """
-        return self.num_actions * len(self.tilings) * self.num_tiles
+        return self.num_actions * self.num_tilings * self.num_tiles[0] * self.num_tiles[1]
 
     def __call__(self, s, done, a) -> np.array:
         """
         implement function x: S+ x A -> [0,1]^d
         if done is True, then return 0^d
         """
-        
-        indices = [np.floor((s - start_pos) / self.tile_width).astype(int) for start_pos, _ in self.tilings]
-        weights_of_tilings = [weights for _, weights in self.tilings]
+        x = np.zeros((self.feature_vector_len()), dtype=np.float64)
         if done:
-            return np.zeros(self.feature_vector_len())
+            return x
         else:
-            return sum([weights[index[0]][index[1]][a] for weights, index in zip(weights_of_tilings, indices)])
+            tile_indices = [np.floor((s - coord) / self.tile_width).astype(int) for coord in self.start_coords]
+            indices = [
+                i * self.num_actions * self.num_tiles[0] * self.num_tiles[1] +
+                a * self.num_tiles[0] * self.num_tiles[1] +
+                tile_index[1] * self.num_tiles[1] +
+                tile_index[0]
+                for i, tile_index in enumerate(tile_indices)
+            ]
+            print(indices)
+            for index in indices:
+                x[index] = 1.0
+            return x
 
 def SarsaLambda(
     env, # openai gym environment
@@ -66,22 +72,19 @@ def SarsaLambda(
     w = np.zeros((X.feature_vector_len()))
 
     for _ in range(num_episode):
-        # generate a new episode
         S = []
         A = []
         R = [0]
         state, _ = env.reset()
         S += [state]
-        done = False
-        t = 0
-        action = epsilon_greedy_policy(state, done, w)
+        action = epsilon_greedy_policy(state, False, w)
         A += [action]
-        x = X(S[t], done, A[t])
+        x = X(state, False, action)
         z = np.zeros((X.feature_vector_len()))
         Q_old = 0
+        t = 1
+        done = False
         while not done:
-            action = epsilon_greedy_policy(state, done, w)
-            A += [action]
             state, reward, done, _, _ = env.step(action)
             S += [state]
             R += [reward]
@@ -95,4 +98,7 @@ def SarsaLambda(
             Q_old = Q_prime
             x = x_prime
             action = action_prime
+            A += [action]
             t += 1
+            # print(w)
+        return w
