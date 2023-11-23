@@ -84,7 +84,7 @@ def SarsaLambda(
         t = 1
         done = False
         while not done:
-            state, reward, done, _, _ = env.step(action)
+            state, reward, done, _ = env.step(action)
             S += [state]
             R += [reward]
             action_prime = epsilon_greedy_policy(state, done, w)
