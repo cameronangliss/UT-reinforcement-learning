@@ -44,7 +44,6 @@ class StateActionFeatureVectorWithTile():
                 tile_index[0]
                 for i, tile_index in enumerate(tile_indices)
             ]
-            print(indices)
             for index in indices:
                 x[index] = 1.0
             return x
@@ -100,5 +99,4 @@ def SarsaLambda(
             action = action_prime
             A += [action]
             t += 1
-            # print(w)
-        return w
+    return w
