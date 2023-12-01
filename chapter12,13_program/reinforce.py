@@ -125,7 +125,7 @@ def REINFORCE(
         # use episode to update policy
         T = len(S)
         for t in range(T):
-            G = sum([gamma**(k - t - 1) * R[k] for k in range(t + 1, T - 1)])
+            G = sum([gamma**(k - t - 1) * R[k] for k in range(t + 1, T + 1)])
             delta = G - V(S[t])
             V.update(S[t], G)
             pi.update(S[t], A[t], gamma**t, delta)
