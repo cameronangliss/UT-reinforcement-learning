@@ -18,15 +18,15 @@ class PiApproximationWithNN():
             torch.nn.ReLU(),
             torch.nn.Linear(32, 32),
             torch.nn.ReLU(),
-            torch.nn.Linear(32, num_actions),
-            torch.nn.Softmax()
+            torch.nn.Linear(32, num_actions)
         )
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=alpha, betas=(0.9, 0.999))
 
     def __call__(self,s) -> int:
         self.network.eval()
         output = self.network(torch.tensor(s, dtype=torch.float))
-        distribution = torch.distributions.Categorical(probs=output)
+        soft_output = torch.softmax(output, dim=0)
+        distribution = torch.distributions.Categorical(probs=soft_output)
         return int(distribution.sample().item())
 
     def update(self, s, a, gamma_t, delta):
@@ -38,7 +38,8 @@ class PiApproximationWithNN():
         """
         self.network.train()
         output = self.network(torch.tensor(s, dtype=torch.float))
-        loss = gamma_t * delta * torch.log(output[a])
+        soft_output = torch.softmax(output, dim=0)
+        loss = -gamma_t * delta * torch.log(soft_output[a])
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
@@ -64,7 +65,6 @@ class VApproximationWithNN(Baseline):
         state_dims: the number of dimensions of state space
         alpha: learning rate
         """
-        
         self.loss_fn = torch.nn.MSELoss()
         self.network = torch.nn.Sequential(
             torch.nn.Linear(state_dims, 32),
@@ -82,7 +82,8 @@ class VApproximationWithNN(Baseline):
 
     def update(self,s,G):
         self.network.train()
-        loss = self.loss_fn(self.network(torch.tensor(s, dtype=torch.float)), torch.tensor([G], dtype=torch.float))
+        delta = G - self.network(torch.tensor(s, dtype=torch.float))
+        loss = self.loss_fn(self.network(torch.tensor(s, dtype=torch.float)), delta)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
