@@ -13,20 +13,21 @@ class PiApproximationWithNN():
         action_dims: the number of possible actions
         alpha: learning rate
         """
-        self.loss_fn = torch.nn.CrossEntropyLoss()
         self.network = torch.nn.Sequential(
             torch.nn.Linear(state_dims, 32),
             torch.nn.ReLU(),
             torch.nn.Linear(32, 32),
             torch.nn.ReLU(),
-            torch.nn.Linear(32, num_actions)
+            torch.nn.Linear(32, num_actions),
+            torch.nn.Softmax()
         )
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=alpha, betas=(0.9, 0.999))
 
     def __call__(self,s) -> int:
         self.network.eval()
-        input_tensor = torch.tensor(s, dtype=torch.float)
-        return torch.argmax(self.network(input_tensor)).item()
+        output = self.network(torch.tensor(s, dtype=torch.float))
+        distribution = torch.distributions.Categorical(probs=output)
+        return int(distribution.sample().item())
 
     def update(self, s, a, gamma_t, delta):
         """
@@ -36,8 +37,8 @@ class PiApproximationWithNN():
         delta: G-v(S_t,w)
         """
         self.network.train()
-        output_tensor = self.network(torch.tensor([s], dtype=torch.float))
-        loss = self.loss_fn(output_tensor, torch.tensor([gamma_t * delta], dtype=torch.float))
+        output = self.network(torch.tensor(s, dtype=torch.float))
+        loss = gamma_t * delta * torch.log(output[a])
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
@@ -113,13 +114,12 @@ def REINFORCE(
         A = []
         R = [0]
         state = env.reset()
-        S += [state]
         done = False
         while not done:
+            S += [state]
             action = pi(state)
             A += [action]
             state, reward, done, _ = env.step(action)
-            S += [state]
             R += [reward]
 
         # use episode to update policy
